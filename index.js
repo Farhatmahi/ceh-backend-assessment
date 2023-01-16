@@ -107,6 +107,7 @@ const run = async () => {
       }
     });
 
+    //add report
     app.post("/add-report/:id", verifyJWT, async (req, res) => {
       const projectId = req.params.id;
       const project = await projectsCollection.findOne({
@@ -114,12 +115,45 @@ const run = async () => {
       });
 
       if (!project) {
-        res.status(404).send({ message: "Project not found" });
+        return res.status(404).send({ message: "Project not found" });
       }
 
       const newReport = req.body;
-      const result = await reportsCollection.insertOne(newReport);
-      res.status(200).send(result);
+
+      if (newReport.week === "" || newReport.report_link === "") {
+        return res.status(400).send({ message: "Please enter week and report" });
+      } else {
+        const result = await reportsCollection.insertOne(newReport);
+        res.status(200).send(result);
+      }
+    });
+
+    //add feedback
+    app.put("/add-feedback/:id", async (req, res) => {
+      const projectId = req.params.id;
+      const project = await projectsCollection.findOne({
+        _id: ObjectId(projectId),
+      });
+
+      if (!project) {
+        return res.status(404).send({ message: "Project not found" });
+      }
+
+      const newFeedback = req.body;
+
+      if (!newFeedback.stars === "undefined") {
+        return res.status(400).send({ message: "Please leave stars" });
+      }
+
+      const updatedDoc = {
+        $set: {
+          feedback: newFeedback,
+        },
+      };
+      const result = await projectsCollection.updateOne(project, updatedDoc, {
+        upsert: true,
+      });
+      res.send(result);
     });
   } catch (error) {
     res.status(400);
