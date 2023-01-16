@@ -2,12 +2,10 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 4000;
 require("dotenv").config();
-const bcrypt = require("bcrypt");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const userRoute = require('./Routes/userRoute');
 const newStudentRoute = require('./Routes/newStudentRoute')
+const newClientRoute = require('./Routes/newClientRoute')
 
 //middleware
 app.use(express.json());
@@ -35,3 +33,4 @@ connectDB().catch(err => console.log(err))
 
 app.use('/user', userRoute)
 app.use('/new-student', newStudentRoute)
+app.use('/new-client', newClientRoute)

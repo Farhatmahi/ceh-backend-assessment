@@ -1,19 +1,21 @@
 const asyncHandler = require("express-async-handler");
-const NewStudent = require("../Models/newStudentModel");
+const NewClient = require("../Models/newClientModel");
 const generateProspectId = require("../Config/generateProspectId");
 const User = require("../Models/userModel");
 
-const newStudentForm = asyncHandler(async (req, res) => {
+const newClientForm = asyncHandler(async (req, res) => {
   try {
+
     const {
       name,
-      guardian_name,
+      company_name,
       phone_number,
       address,
-      learning_interest,
-      future_goals,
+      requirement,
+      deadline_after_monday,
+      budget,
+      email,
       hear_about_us,
-      email
     } = req.body;
 
     const { user } = req;
@@ -26,31 +28,33 @@ const newStudentForm = asyncHandler(async (req, res) => {
 
     if (
       !name ||
-      !guardian_name ||
+      !company_name ||
       !phone_number ||
       !address ||
-      !learning_interest ||
-      !future_goals ||
-      !hear_about_us || !email
+      !requirement ||
+      !deadline_after_monday ||
+      !hear_about_us ||
+      !email
     ) {
+    
       return res.status(400).send({ message: "Please enter all fields" });
     }
 
     const prospectId = generateProspectId();
-
-    const newStudent = new NewStudent({
+    const newClient = new NewClient({
       name,
-      guardian_name,
+      company_name,
       phone_number,
       address,
-      learning_interest,
-      future_goals,
-      hear_about_us,
+      requirement,
+      deadline_after_monday,
+      budget,
       email,
+      hear_about_us,
       prospectId,
     });
 
-    await newStudent.save();
+    await newClient.save();
 
     await User.findOneAndUpdate(
       { _id: user._id },
@@ -58,9 +62,7 @@ const newStudentForm = asyncHandler(async (req, res) => {
     );
 
     res.status(201).json({ success: true, prospectId, user });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
-  }
+  } catch (error) {}
 });
 
-module.exports = { newStudentForm };
+module.exports = { newClientForm };

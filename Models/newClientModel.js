@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
-const newStudentSchema = new mongoose.Schema({
+const newClientSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
   },
-  guardian_name: {
+  company_name: {
     type: String,
     required: true,
   },
@@ -21,13 +21,16 @@ const newStudentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  learning_interest: {
+  requirement: {
     type: String,
     required: true,
   },
-  future_goals: {
+  deadline_after_monday: {
     type: String,
     required: true,
+  },
+  budget: {
+    type: String,
   },
   hear_about_us: {
     type: String,
@@ -35,5 +38,5 @@ const newStudentSchema = new mongoose.Schema({
   },
 });
 
-const NewStudent = mongoose.model("NewStudent", newStudentSchema);
-module.exports = NewStudent;
+const NewClient = mongoose.model("NewClient", newClientSchema);
+module.exports = NewClient;
