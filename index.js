@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const userRoute = require('./Routes/userRoute');
 const newStudentRoute = require('./Routes/newStudentRoute')
 const newClientRoute = require('./Routes/newClientRoute')
+const postJobRoute = require('./Routes/postJobRoute')
 
 //middleware
 app.use(express.json());
@@ -34,3 +35,4 @@ connectDB().catch(err => console.log(err))
 app.use('/user', userRoute)
 app.use('/new-student', newStudentRoute)
 app.use('/new-client', newClientRoute)
+app.use('/post-job', postJobRoute)
