@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const userRoute = require('./Routes/userRoute');
 
 //middleware
 app.use(express.json());
@@ -212,3 +213,5 @@ const connectDB = async () => {
 };
 
 connectDB().catch(err => console.log(err))
+
+app.use('/user', userRoute)
