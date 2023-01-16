@@ -1,19 +1,86 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../Models/userModel");
-// const setPassword = require('../Config/setPassword');
+const generateToken = require("../Config/generateToken");
+const bcrypt = require("bcrypt");
 
 
-const register = asyncHandler(async(req, res) => {
-    try {
-      const { username, email, password, role } = req.body;
-      const user = new User({ username, email, role });
-      user.setPassword(password);
-      await user.save();
-      res.status(201).json({ success: true, data: user });
-    } catch(err) {
-      res.status(400).json({ success: false, error: err.message });
+const register = asyncHandler(async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).send({ message: "Please enter all fields" });
     }
-  });
-  
 
-  module.exports = { register };
+    const userExists = await User.findOne({ email: email });
+    if (userExists) {
+      return res.status(400).send({ message: "Email already exists" });
+    }
+
+    const user = await User.create({
+      username,
+      email,
+      password,
+      role,
+    });
+
+    user.setPassword(password);
+
+    await user.save();
+
+    if (user) {
+      {
+        const generatedToken = generateToken(user._id);
+        console.log(generatedToken);
+        const updateUser = await User.findOneAndUpdate(
+          user._id,
+          {
+            token: generatedToken,
+          },
+          { new: true }
+        );
+
+        res.status(201).json({ success: true, data: updateUser });
+      }
+    }
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+
+const login = asyncHandler(async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).send({ message: "Please enter all fields" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(401).send({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).send({ message: "Invalid credentials" });
+    }
+
+    const generatedToken = generateToken(user._id);
+
+    await User.findOneAndUpdate(
+      { _id: user._id },
+      { token: generatedToken },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, token: generatedToken });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+module.exports = { register, login };
