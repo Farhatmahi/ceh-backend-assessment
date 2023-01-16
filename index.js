@@ -139,6 +139,10 @@ const run = async () => {
         return res.status(404).send({ message: "Project not found" });
       }
 
+      if(project.feedback){
+        return res.send({message : "Feedback already added"})
+      }
+
       const newFeedback = req.body;
 
       if (!newFeedback.stars === "undefined") {
@@ -150,11 +154,18 @@ const run = async () => {
           feedback: newFeedback,
         },
       };
+
+
       const result = await projectsCollection.updateOne(project, updatedDoc, {
         upsert: true,
       });
       res.send(result);
+
     });
+
+
+
+
   } catch (error) {
     res.status(400);
   }
