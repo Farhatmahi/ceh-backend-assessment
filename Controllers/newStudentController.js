@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
-const Course = require("../Models/newStudentModel");
+const NewStudent = require("../Models/newStudentModel");
 const generateProspectId = require("../Config/generateProspectId");
+const User = require("../Models/userModel");
 
 const newStudentForm = asyncHandler(async (req, res) => {
   try {
@@ -13,6 +14,14 @@ const newStudentForm = asyncHandler(async (req, res) => {
       future_goals,
       hear_about_us,
     } = req.body;
+
+    const { user } = req;
+
+    if (!user) {
+      return res
+        .status(401)
+        .send({ message: "You must be logged in to complete this action" });
+    }
 
     if (
       !name ||
@@ -28,7 +37,7 @@ const newStudentForm = asyncHandler(async (req, res) => {
 
     const prospectId = generateProspectId();
 
-    const course = new Course({
+    const newStudent = new NewStudent({
       name,
       guardian_name,
       phone_number,
@@ -39,9 +48,14 @@ const newStudentForm = asyncHandler(async (req, res) => {
       prospectId,
     });
 
-    await course.save();
+    await newStudent.save();
 
-    res.status(201).json({ success: true, prospectId });
+    await User.findOneAndUpdate(
+      { _id: user._id },
+      { $set: { prospect_id: prospectId } }
+    );
+
+    res.status(201).json({ success: true, prospectId, user });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }
